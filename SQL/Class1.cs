@@ -4,6 +4,6 @@ namespace SQL
 {
     public class Class1
     {
-        public string con = "Hola mundo.......";
+        public string con = "";
     }
 }
