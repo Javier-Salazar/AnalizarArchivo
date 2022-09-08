@@ -32,7 +32,7 @@ namespace UI
         public Process.Validaciones cl1 = new Validaciones();
         public string Strpath, mensaje, nombretabla, Colname;
         public int reglon = 1, col = 0,select;
-        public DataTable dt, table;
+        public DataTable dt, Excel;
         List<DataTable> ListaDatos;
         List<Filtros> filtro;
         List<Errores>  Tablaerrores;
@@ -59,12 +59,7 @@ namespace UI
                 Colname = (sender as Button).DataContext.ToString();
                 popexcel.PlacementTarget = (sender as Button);
                 filtro = new List<Filtros>();
-                table = new DataTable();
-                using (var reader = ObjectReader.Create(Tablaerrores, "ID", "Renglon", "Columna","Error"))
-                {
-                    table.Load(reader);
-                }
-                dtDistinct = table.DefaultView.ToTable(true, Colname);
+                dtDistinct = Excel.DefaultView.ToTable(true, Colname);
                 foreach (DataRow item in dtDistinct.Rows)
                 {
                     filtro.Add(new Filtros() { Name = item[0].ToString(), ischeck = false });
@@ -128,11 +123,10 @@ namespace UI
 
         private void btncargar_Click(object sender, RoutedEventArgs e)
         {
-           
             if (ccbtabla.SelectedIndex != 0){
                 seleccion();
-                //MessageBox.Show("Procesando....", "Process", MessageBoxButton.OK, MessageBoxImage.Information);
-                //CrearArchivo(tablaerror);
+                MessageBox.Show("Terminado....", "Process", MessageBoxButton.OK, MessageBoxImage.Information);
+                CrearArchivo(Excel);
             }
             else{
                 MessageBox.Show("Selecciona el tipo de archivo que se desea Cargar","Error",MessageBoxButton.OK,MessageBoxImage.Information);
@@ -167,6 +161,11 @@ namespace UI
                     }
                     reglon++;
                 }
+                Excel = new DataTable();
+                using (var reader = ObjectReader.Create(Tablaerrores, "ID", "Renglon", "Columna", "Error"))
+                {
+                    Excel.Load(reader);
+                }
                 return Tablaerrores;
             }
             catch (Exception er)
@@ -175,6 +174,7 @@ namespace UI
                 return Tablaerrores;
             }
         }
+
         public void CrearArchivo(DataTable data)
         {
             saveFile = new SaveFileDialog();
@@ -208,7 +208,6 @@ namespace UI
                 case "Error":
                     var sql4 = from Datos in Tablaerrores where Datos.Error == name select Datos; tabla.ItemsSource = sql4;
                     break;
-
                 default:
                     break;
             }

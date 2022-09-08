@@ -36,7 +36,7 @@ namespace Process
                     }
                     else if (col == "HTS Duty" || col == "HTS Expo" || col == "HTS Impo")
                     {
-                        ValidarHTS(dato);
+                        ValidarHTS(dato.Trim());
                     }
                     else if (col == "Preferencia")
                     {
@@ -47,7 +47,7 @@ namespace Process
                     validarFecha(dato);
                     break;
                 case "N":
-                    validarNumero(dato, logitud, col);
+                    validarNumero(dato.Trim(), logitud, col);
                     break;
             }
             return mensaje;
@@ -118,7 +118,7 @@ namespace Process
             mensaje = null;
             Val = new Regex(@"([0-9]{1,4})(\.[0-9]{0,2})(\.[0-9]{0,4})?$");
             if (!Val.IsMatch(dato) || dato.Length != 12){
-                mensaje = "No contiene el formato correcto";
+                mensaje = "El HTS: "+dato+" no contiene el formato correcto";
             }
             return mensaje;
         }
