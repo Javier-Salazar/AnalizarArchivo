@@ -13,44 +13,35 @@ namespace SQL
         DataTable data;
         SqlConnection con = new SqlConnection("Data Source=AHERNANDEZ;Initial Catalog=GlobalTradeSMPFS;Persist Security Info=True;User ID=Prisma; password=Prisma@1");
         public string mensaje, nombretabla, sql;
+        public bool flag = false;
 
         public string ObtenerTabla(string v)
         {
-            nombretabla = "";
-            if (v == "Customers and Vendors")
-            {
-                nombretabla = "VENDCUST";
-            }
-            else if (v == "Classes")
-            {
-                nombretabla = "CLASES";
-            }
-            else if (v == "Finished Goods and Components")
-            {
-                nombretabla = "ITEMMASTER";
-            }
-            else if (v == "Bill of Materials")
-            {
-                nombretabla = "BOM";
+            switch (v){
+                case "Customers and Vendors":
+                    nombretabla = "VENDCUST";
+                    break;
+                case "Classes":
+                    nombretabla = "CLASES";
+                    break;
+                case "Finished Goods and Components":
+                    nombretabla = "ITEMMASTER";
+                    break;
+                case "Bill of Materials":
+                    nombretabla = "BOM";
+                    break;
             }
             return nombretabla;
         }
         public DataTable MostrarTabla(string v)
         {
-            try
-            {
-                data = new DataTable();
-                con.Open();
-                com = new SqlCommand("SELECT clyd_col_name,clyd_col_len,clyd_col_dtype FROM cfglayoutdef WHERE clyd_tabla = '" + ObtenerTabla(v) + "' AND clyd_erp = 'IMPLEMENTACION'", con);
-                sda = new SqlDataAdapter(com);
-                sda.Fill(data);
-                con.Close();
-                creartabla(data);
-            }
-            catch (Exception er)
-            {
-                mensaje = "mensaje de conexión a la base de datos. " + er.Message;
-            }
+            data = new DataTable();
+            con.Open();
+            com = new SqlCommand("SELECT clyd_col_name,clyd_col_len,clyd_col_dtype FROM cfglayoutdef WHERE clyd_tabla = '" + ObtenerTabla(v) + "' AND clyd_erp = 'IMPLEMENTACION'", con);
+            sda = new SqlDataAdapter(com);
+            sda.Fill(data);
+            con.Close();
+            creartabla(data);
             return data;
         }
         public void creartabla(DataTable data)
@@ -82,32 +73,18 @@ namespace SQL
         }
         public bool Buscarclave(string v1, string v2, string v3, int op)
         {
-            try
-            {
-
-                con.Open();
-                com = new SqlCommand("SELECT * from " + v1 + " where " + v2 + " = '" + v3 + "'", con);
-                leer = com.ExecuteReader();
-                if (leer.Read())
-                {
-                    con.Close();
-                    return true;
-                }
-                else
-                {
-                    con.Close();
-                    if (op == 1)
-                    {
-                        Insertar(nombretabla,v2,v3);
-                    }
-                    return false;
-                }
-            }
-            catch (Exception)
+            flag = false;
+            con.Open();
+            com = new SqlCommand("SELECT * from " + v1 + " where " + v2 + " = '" + v3 + "'", con);
+            leer = com.ExecuteReader();
+            if (!leer.Read())
             {
                 con.Close();
-                return false;
+                if(op == 1) { Insertar(nombretabla, v2, v3); }
+                flag = true;
             }
+            con.Close();
+            return flag;
         }
     }
 }
