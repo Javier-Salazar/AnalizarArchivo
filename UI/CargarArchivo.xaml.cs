@@ -33,15 +33,15 @@ namespace UI
         public string Strpath, mensaje, nombretabla, Colname;
         public int reglon = 1, col = 0,select;
         public DataTable dt, Excel;
-        List<DataTable> ListaDatos;
-        List<Filtros> filtro;
-        List<Errores>  Tablaerrores;
-        IExcelDataReader reader;
-        OpenFileDialog openFileDialog;
-        ExcelDataSetConfiguration conf;
-        SaveFileDialog saveFile;
-        SLDocument oSLDocument;
-        DataTable dtDistinct;
+        private List<DataTable> ListaDatos;
+        private List<Filtros> filtro;
+        private List<Errores> Tablaerrores;
+        private IExcelDataReader reader;
+        private OpenFileDialog openFileDialog;
+        private ExcelDataSetConfiguration conf;
+        private SaveFileDialog saveFile;
+        private SLDocument oSLDocument;
+        private DataTable dtDistinct;
         public MainWindow()
         {
             InitializeComponent();
@@ -49,7 +49,7 @@ namespace UI
 
         private void ccbarchivos_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            select = ccbarchivos.SelectedIndex-1;
+            select = ccbarchivos.SelectedIndex - 1;
         }
 
         private void btnfiltrar_Click(object sender, RoutedEventArgs e)
@@ -57,7 +57,7 @@ namespace UI
             try
             {
                 Colname = (sender as Button).DataContext.ToString();
-                popexcel.PlacementTarget = (sender as Button);
+                popexcel.PlacementTarget = sender as Button;
                 filtro = new List<Filtros>();
                 dtDistinct = Excel.DefaultView.ToTable(true, Colname);
                 foreach (DataRow item in dtDistinct.Rows)
@@ -75,13 +75,13 @@ namespace UI
 
         private void btnrealizarfiltro_Click(object sender, RoutedEventArgs e)
         {
-            string caption="";
-            foreach (var item in filtro)
+            string caption = "";
+            foreach (Filtros item in filtro)
             {
-                if (item.ischeck == true)
+                if (item.ischeck)
                 {
-                    caption += item.Name+", ";
-                }    
+                    caption += item.Name;
+                }
             }
             tabla.ItemsSource = null;
             buscar(caption, Colname);
@@ -125,11 +125,11 @@ namespace UI
         {
             if (ccbtabla.SelectedIndex != 0){
                 seleccion();
-                MessageBox.Show("Terminado....", "Process", MessageBoxButton.OK, MessageBoxImage.Information);
+                _ = MessageBox.Show("Terminado....", "Process", MessageBoxButton.OK, MessageBoxImage.Information);
                 CrearArchivo(Excel);
             }
             else{
-                MessageBox.Show("Selecciona el tipo de archivo que se desea Cargar","Error",MessageBoxButton.OK,MessageBoxImage.Information);
+                _ = MessageBox.Show("Selecciona el tipo de archivo que se desea Cargar", "Error", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -150,7 +150,7 @@ namespace UI
                 foreach (DataRow row in data.Rows)
                 {
                     col = 0;
-                    foreach (var item in row.ItemArray)
+                    foreach (object item in row.ItemArray)
                     {
                         mensaje = cl1.validar(item.ToString(), dt.Rows[col]["clyd_col_dtype"].ToString(), Convert.ToInt32(dt.Rows[col]["clyd_col_len"].ToString()), nombretabla, dt.Rows[col][0].ToString());
                         if (mensaje != null)
@@ -162,7 +162,7 @@ namespace UI
                     reglon++;
                 }
                 Excel = new DataTable();
-                using (var reader = ObjectReader.Create(Tablaerrores, "ID", "Renglon", "Columna", "Error"))
+                using (ObjectReader reader = ObjectReader.Create(Tablaerrores, "ID", "Renglon", "Columna", "Error"))
                 {
                     Excel.Load(reader);
                 }
@@ -170,16 +170,18 @@ namespace UI
             }
             catch (Exception er)
             {
-                MessageBox.Show("Error "+er.Message);
+                _ = MessageBox.Show("Error " + er.Message);
                 return Tablaerrores;
             }
         }
 
         public void CrearArchivo(DataTable data)
         {
-            saveFile = new SaveFileDialog();
-            saveFile.Filter = "Name of file (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-            saveFile.Title = "Save an Excel File";
+            saveFile = new SaveFileDialog
+            {
+                Filter = "Name of file (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+                Title = "Save an Excel File"
+            };
             saveFile.ShowDialog();
             if (saveFile.FileName != "")
             {
@@ -197,23 +199,20 @@ namespace UI
             switch (colname)
             {
                 case "ID":
-                     var sql1 = from Datos in Tablaerrores where Datos.ID == name select Datos;  tabla.ItemsSource = sql1;
+                    IEnumerable<Errores> sql1 = from Datos in Tablaerrores where Datos.ID == name select Datos; tabla.ItemsSource = sql1;
                     break;
                 case "Renglon":
-                     var sql2 = from Datos in Tablaerrores where Datos.Renglon == Convert.ToInt32(name) select Datos; tabla.ItemsSource = sql2;
+                    IEnumerable<Errores> sql2 = from Datos in Tablaerrores where Datos.Renglon.ToString() == name select Datos; tabla.ItemsSource = sql2;
                     break;
                 case "Columna":
-                    var sql3 = from Datos in Tablaerrores where Datos.Columna == name select Datos; tabla.ItemsSource = sql3;
+                    IEnumerable<Errores> sql3 = from Datos in Tablaerrores where Datos.Columna == name select Datos; tabla.ItemsSource = sql3;
                     break;
                 case "Error":
-                    var sql4 = from Datos in Tablaerrores where Datos.Error == name select Datos; tabla.ItemsSource = sql4;
+                    IEnumerable<Errores> sql4 = from Datos in Tablaerrores where Datos.Error == name select Datos; tabla.ItemsSource = sql4;
                     break;
                 default:
                     break;
             }
-
-            
-            
 
         }
     }
